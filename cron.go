@@ -257,7 +257,7 @@ func NewNameContext(ctx context.Context, name string) context.Context {
 	return context.WithValue(ctx, nameKey, name)
 }
 
-func NameFronContext(ctx context.Context) string {
+func NameFromContext(ctx context.Context) string {
 	if v, ok := ctx.Value(nameKey).(string); ok {
 		return v
 	}

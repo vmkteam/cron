@@ -69,7 +69,6 @@ formatters:
     gci:
       sections:
         - standard
-        - prefix(apisrv)
         - default
       no-inline-comments: true
       no-prefix-comments: true

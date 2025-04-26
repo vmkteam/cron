@@ -33,7 +33,7 @@ func WithLogger(pf LogPrintf, managerName string) MiddlewareFunc {
 
 			pf("cron job %s job=%s duration=%v err=%q manager=%s maintenance=%v",
 				state,
-				NameFronContext(ctx),
+				NameFromContext(ctx),
 				time.Since(start),
 				errMsg,
 				managerName,
@@ -57,7 +57,7 @@ func WithSLog(lg Logger) MiddlewareFunc {
 			start := time.Now()
 			err := next(ctx)
 
-			d, name := time.Since(start), NameFronContext(ctx)
+			d, name := time.Since(start), NameFromContext(ctx)
 			if errors.Is(err, ErrSkipped) {
 				lg.Print(ctx, "cron job skipped", "job", name, "duration", d)
 			} else if err != nil {
@@ -89,7 +89,7 @@ func WithSentry() MiddlewareFunc {
 				if err != nil {
 					sentryHub := sentry.CurrentHub().Clone()
 					sentryHub.WithScope(func(scope *sentry.Scope) {
-						scope.SetTag("cron", NameFronContext(ctx))
+						scope.SetTag("cron", NameFromContext(ctx))
 					})
 					sentryHub.CaptureException(err)
 				}
@@ -148,7 +148,7 @@ func WithSkipActive() MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name := NameFronContext(ctx)
+			name := NameFromContext(ctx)
 
 			// check for running function
 			mu.Lock()
@@ -183,7 +183,7 @@ func WithMaintenance(p LogPrintf) MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name, isMaintenance := NameFronContext(ctx), MaintenanceFromContext(ctx)
+			name, isMaintenance := NameFromContext(ctx), MaintenanceFromContext(ctx)
 			if isMaintenance {
 				pf("cron getting maintenance lock=%v", name)
 				mutex.Lock()
@@ -232,7 +232,7 @@ func WithMetrics(app string) MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name, start, state := NameFronContext(ctx), time.Now(), "ok"
+			name, start, state := NameFromContext(ctx), time.Now(), "ok"
 
 			statActive.WithLabelValues(app, name).Inc()
 			err := next(ctx)
