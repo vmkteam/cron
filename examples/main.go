@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"log"
 	"log/slog"
 	"math/rand/v2"

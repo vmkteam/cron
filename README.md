@@ -1,6 +1,5 @@
 # cron manager
 
-[![Build Status](https://github.com/vmkteam/cron/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/vmkteam/cron/actions)
 [![Linter Status](https://github.com/vmkteam/cron/actions/workflows/golangci-lint.yml/badge.svg?branch=master)](https://github.com/vmkteam/cron/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vmkteam/cron)](https://goreportcard.com/report/github.com/vmkteam/cron)
 [![Go Reference](https://pkg.go.dev/badge/github.com/vmkteam/cron.svg)](https://pkg.go.dev/github.com/vmkteam/cron)
@@ -27,9 +26,12 @@ A robust cron job manager built on [robfig/cron](https://github.com/robfig/cron)
 * `WithMaintenance` Ensures exclusive execution for maintenance jobs.
 * `WithMetrics` Tracks execution metrics (count, duration, active jobs).
 
+## Built-in UI Preview
+![Web UI](/examples/webui.png)
+
 ## Example
 
-Please see `testdata/main.go` for basic usage.
+Please see `examples/main.go` for basic usage.
 
 ```go
     m := cron.NewManager()
