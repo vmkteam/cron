@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -89,7 +90,7 @@ func (cm *Manager) Handler(w http.ResponseWriter, r *http.Request) {
 
 	startID := r.URL.Query().Get("start")
 	if startID != "" {
-		go cm.ManualRun(r.Context(), startID)
+		go cm.ManualRun(context.WithoutCancel(r.Context()), startID)
 		http.Redirect(w, r, r.URL.Path, http.StatusFound)
 		return
 	}
