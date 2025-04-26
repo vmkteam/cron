@@ -17,7 +17,7 @@ lint:
 
 run:
 	@echo "Compiling"
-	@go run $(GOFLAGS) testdata/main.go
+	@go run $(GOFLAGS) examples/main.go
 
 test:
 	@echo "Running tests"
