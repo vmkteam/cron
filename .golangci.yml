@@ -1,0 +1,84 @@
+version: "2"
+run:
+  concurrency: 4
+  issues-exit-code: 1
+  tests: true
+output:
+  formats:
+    text:
+      path: stdout
+      print-linter-name: true
+      print-issued-lines: true
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - decorder
+    - dogsled
+    - dupl
+    - errname
+    - gocognit
+    - goconst
+    - gocritic
+    - govet
+    - ineffassign
+    - makezero
+    - nilerr
+    - predeclared
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+  settings:
+    gocognit:
+      min-complexity: 40
+    gocritic:
+      enabled-checks:
+        - appendCombine
+        - boolExprSimplify
+        - emptyFallthrough
+        - emptyStringTest
+        - equalFold
+        - hexLiteral
+        - indexAlloc
+        - nilValReturn
+        - yodaStyleExpr
+      disabled-checks:
+        - ifElseChain
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - .*\_gen\.go$
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - prefix(apisrv)
+        - default
+      no-inline-comments: true
+      no-prefix-comments: true
+      custom-order: true
+      no-lex-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - .*\_gen\.go$
+      - third_party$
+      - builtin$
+      - examples$
