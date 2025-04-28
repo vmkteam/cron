@@ -29,6 +29,27 @@ A robust cron job manager built on [robfig/cron](https://github.com/robfig/cron)
 ## Built-in UI Preview
 ![Web UI](/examples/webui.png)
 
+### curl support
+
+Run `curl http://localhost:2112/debug/cron` for schedule.
+```
+cron                   |  schedule     |  next                    |  state
+cron=f1                |  * * * * *    |  (starts in 16.505033s)  |  idle
+cron=f2                |  * * * * *    |  (starts in 16.505028s)  |  idle
+cron=f5                |               |  never                   |  disabled
+cron=f3 (maintenance)  |  */2 * * * *  |  (starts in 16.505025s)  |  idle
+```
+
+Run `curl -L http://localhost:2112/debug/cron?start=<name>` for manual job run.
+
+Run `curl -H 'Accept: application/json' http://localhost:2112/debug/cron` for json output.
+
+## `WithMetrics` Middleware 
+
+* `app_cron_evaluated_total` – total processed jobs by state.
+* `app_cron_active_count` – active running jobs.
+* `app_cron_evaluated_duration_seconds` – summary metric with durations.
+
 ## Example
 
 Please see `examples/main.go` for basic usage.

@@ -223,8 +223,8 @@ func WithMetrics(app string) MiddlewareFunc {
 
 	statDurations := prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace: "app",
-		Subsystem: "rpc",
-		Name:      "job_duration_seconds",
+		Subsystem: "cron",
+		Name:      "evaluated_duration_seconds",
 		Help:      "Response time by cron.",
 	}, []string{"app", "cron", "state"})
 
