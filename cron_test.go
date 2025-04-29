@@ -49,7 +49,7 @@ func TestManager_Validate(t *testing.T) {
 
 func TestManager_Run(t *testing.T) {
 	Convey("Test validate function", t, func() {
-		ctx := context.Background()
+		ctx := t.Context()
 		m := NewManager()
 		m.Use(
 			WithDevel(false),

@@ -12,8 +12,9 @@ fmt:
 	@golangci-lint fmt
 
 lint:
-	@golangci-lint --version
-	@golangci-lint run -c .golangci.yml
+	@golangci-lint version
+	@golangci-lint config verify
+	@golangci-lint run
 
 run:
 	@echo "Compiling"

@@ -58,11 +58,12 @@ func WithSLog(lg Logger) MiddlewareFunc {
 			err := next(ctx)
 
 			d, name := time.Since(start), NameFromContext(ctx)
-			if errors.Is(err, ErrSkipped) {
+			switch {
+			case errors.Is(err, ErrSkipped):
 				lg.Print(ctx, "cron job skipped", "job", name, "duration", d)
-			} else if err != nil {
+			case err != nil:
 				lg.Error(ctx, "cron job failed", "job", name, "duration", d, "err", err)
-			} else {
+			default:
 				lg.Print(ctx, "cron job finished", "job", name, "duration", d)
 			}
 
@@ -188,7 +189,6 @@ func WithMaintenance(p LogPrintf) MiddlewareFunc {
 				pf("cron getting maintenance lock=%v", name)
 				mutex.Lock()
 				pf("cron got maintenance lock=%v", name)
-
 			} else {
 				mutex.RLock()
 			}
@@ -217,7 +217,7 @@ func WithMetrics(app string) MiddlewareFunc {
 	statActive := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "app",
 		Subsystem: "cron",
-		Name:      "active_count",
+		Name:      "active",
 		Help:      "Track current status of cron.",
 	}, []string{"app", "cron"})
 

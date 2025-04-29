@@ -10,8 +10,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/vmkteam/cron"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // newTask creates new random task with random sleep (0-70s) and with random error or panic.

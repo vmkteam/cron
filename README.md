@@ -47,7 +47,7 @@ Run `curl -H 'Accept: application/json' http://localhost:2112/debug/cron` for js
 ## `WithMetrics` Middleware 
 
 * `app_cron_evaluated_total` – total processed jobs by state.
-* `app_cron_active_count` – active running jobs.
+* `app_cron_active` – active running jobs.
 * `app_cron_evaluated_duration_seconds` – summary metric with durations.
 
 ## Example
