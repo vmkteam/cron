@@ -188,7 +188,6 @@ func WithMaintenance(p LogPrintf) MiddlewareFunc {
 				pf("cron getting maintenance lock=%v", name)
 				mutex.Lock()
 				pf("cron got maintenance lock=%v", name)
-
 			} else {
 				mutex.RLock()
 			}

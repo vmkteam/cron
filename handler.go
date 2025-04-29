@@ -31,7 +31,7 @@ type State struct {
 
 type States []State
 
-// LogValue реализует интерфейс slog.LogValuer
+// LogValue implements slog.LogValuer.
 func (s States) LogValue() slog.Value {
 	attrs := make([]slog.Attr, len(s))
 	for i, state := range s {

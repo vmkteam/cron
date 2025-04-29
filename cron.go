@@ -189,7 +189,7 @@ func (cm *Manager) Stop() context.Context {
 	return cm.cron.Stop()
 }
 
-// updateState set
+// updateState set.
 func (cm *Manager) updateState(idx int, state cronState, err error) {
 	cm.muState.Lock()
 	defer cm.muState.Unlock()
@@ -223,7 +223,7 @@ func (cm *Manager) updateID(idx int, id cron.EntryID, funcJob Func) {
 	cm.jobs[idx].cronFn = funcJob
 }
 
-// Use adds middleware for cron job
+// Use adds middleware for cron job.
 func (cm *Manager) Use(m ...MiddlewareFunc) {
 	cm.middleware = append(cm.middleware, m...)
 }
