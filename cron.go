@@ -167,7 +167,7 @@ func (cm *Manager) Run(ctx context.Context) error {
 		// register main functions in cron library
 		id, err := cm.cron.AddFunc(j.schedule.String(), func() { _ = cronFnCtx(ctx) })
 		if err != nil {
-			return fmt.Errorf("add cron=%v failed: %v", j.name, err)
+			return fmt.Errorf("add cron=%v failed: %w", j.name, err)
 		}
 
 		// set ID
