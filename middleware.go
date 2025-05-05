@@ -33,11 +33,11 @@ func WithLogger(pf LogPrintf, managerName string) MiddlewareFunc {
 
 			pf("cron job %s job=%s duration=%v err=%q manager=%s maintenance=%v",
 				state,
-				NameFromContext(ctx),
+				name.FromContext(ctx),
 				time.Since(start),
 				errMsg,
 				managerName,
-				MaintenanceFromContext(ctx),
+				maintenance.FromContext(ctx),
 			)
 			return err
 		}
@@ -57,7 +57,7 @@ func WithSLog(lg Logger) MiddlewareFunc {
 			start := time.Now()
 			err := next(ctx)
 
-			d, name := time.Since(start), NameFromContext(ctx)
+			d, name := time.Since(start), name.FromContext(ctx)
 			switch {
 			case errors.Is(err, ErrSkipped):
 				lg.Print(ctx, "cron job skipped", "job", name, "duration", d)
@@ -90,7 +90,7 @@ func WithSentry() MiddlewareFunc {
 				if err != nil {
 					sentryHub := sentry.CurrentHub().Clone()
 					sentryHub.WithScope(func(scope *sentry.Scope) {
-						scope.SetTag("cron", NameFromContext(ctx))
+						scope.SetTag("cron", name.FromContext(ctx))
 					})
 					sentryHub.CaptureException(err)
 				}
@@ -149,7 +149,7 @@ func WithSkipActive() MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name := NameFromContext(ctx)
+			name := name.FromContext(ctx)
 
 			// check for running function
 			mu.Lock()
@@ -184,7 +184,7 @@ func WithMaintenance(p LogPrintf) MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name, isMaintenance := NameFromContext(ctx), MaintenanceFromContext(ctx)
+			name, isMaintenance := name.FromContext(ctx), maintenance.FromContext(ctx)
 			if isMaintenance {
 				pf("cron getting maintenance lock=%v", name)
 				mutex.Lock()
@@ -232,7 +232,7 @@ func WithMetrics(app string) MiddlewareFunc {
 
 	return func(next Func) Func {
 		return func(ctx context.Context) error {
-			name, start, state := NameFromContext(ctx), time.Now(), "ok"
+			name, start, state := name.FromContext(ctx), time.Now(), "ok"
 
 			statActive.WithLabelValues(app, name).Inc()
 			err := next(ctx)
@@ -245,6 +245,23 @@ func WithMetrics(app string) MiddlewareFunc {
 			statDurations.WithLabelValues(app, name, state).Observe(time.Since(start).Seconds())
 
 			return err
+		}
+	}
+}
+
+// WithTimeout returns a MiddlewareFunc that wraps a Func with a context timeout.
+func WithTimeout(timeout time.Duration) MiddlewareFunc {
+	return WithDeadlineFunc(func(ctx context.Context) time.Time { return time.Now().Add(timeout) })
+}
+
+// WithDeadlineFunc returns a MiddlewareFunc that wraps a Func with a context deadline.
+// The deadline is determined by calling the provided function df.
+func WithDeadlineFunc(df func(context.Context) time.Time) MiddlewareFunc {
+	return func(next Func) Func {
+		return func(ctx context.Context) error {
+			ctx, cancel := context.WithDeadline(ctx, df(ctx))
+			defer cancel()
+			return next(ctx)
 		}
 	}
 }
