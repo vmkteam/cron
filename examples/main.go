@@ -42,6 +42,13 @@ func main() {
 	sl := NewLogger(false)
 	ctx := context.Background()
 	m := cron.NewManager()
+
+	deadlineMiddleware := cron.WithDeadlineFunc(func(ctx context.Context) time.Time {
+		return time.Now().Add(50 * time.Second)
+	})
+
+	timeOutMiddleware := cron.WithTimeout(50 * time.Second)
+
 	m.Use(
 		cron.WithMetrics("test"),
 		cron.WithDevel(false),
@@ -51,11 +58,12 @@ func main() {
 		cron.WithSkipActive(),
 		cron.WithRecover(), // recover() inside
 		cron.WithSentry(),  // recover() inside
+		deadlineMiddleware, // use deadlineMiddleware or timeOutMiddleware globally
 	)
 
 	// add simple func
-	m.AddFunc("f1", "* * * * *", newTask("f1"))
-	m.AddFunc("f2", "* * * * *", newTask("f2"))
+	m.AddFunc("f1", "* * * * *", timeOutMiddleware(newTask("f1")))  // use timeOutMiddleware per task
+	m.AddFunc("f2", "* * * * *", deadlineMiddleware(newTask("f2"))) // use deadlineMiddleware per task
 	m.AddFunc("f5", "", newTask("f5"))
 	m.AddMaintenanceFunc("f3", "*/2 * * * *", newTask("f3m"))
 
