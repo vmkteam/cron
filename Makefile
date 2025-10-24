@@ -1,4 +1,4 @@
-LINT_VERSION := v2.1.5
+LINT_VERSION := v2.5.0
 
 ifeq ($(RACE),1)
 	GOFLAGS+=-race

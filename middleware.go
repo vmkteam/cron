@@ -60,11 +60,11 @@ func WithSLog(lg Logger) MiddlewareFunc {
 			d, name := time.Since(start), NameFromContext(ctx)
 			switch {
 			case errors.Is(err, ErrSkipped):
-				lg.Print(ctx, "cron job skipped", "job", name, "duration", d)
+				lg.Print(ctx, "cron job skipped", "job", name, "duration", d.String(), "durationMS", d.Milliseconds())
 			case err != nil:
-				lg.Error(ctx, "cron job failed", "job", name, "duration", d, "err", err)
+				lg.Error(ctx, "cron job failed", "job", name, "duration", d.String(), "durationMS", d.Milliseconds(), "err", err)
 			default:
-				lg.Print(ctx, "cron job finished", "job", name, "duration", d)
+				lg.Print(ctx, "cron job finished", "job", name, "duration", d.String(), "durationMS", d.Milliseconds())
 			}
 
 			return err
