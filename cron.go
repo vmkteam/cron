@@ -12,13 +12,20 @@ import (
 )
 
 const (
-	maintenanceKey contextKey = "maintenance"
-	nameKey        contextKey = "name"
-
 	stateIdle     cronState = "idle"
 	stateDisabled cronState = "disabled"
 	stateRunning  cronState = "running"
 	stateSkipped  cronState = "skipped"
+)
+
+type (
+	maintenanceCtxKey ctxKey
+	nameCtxKey        ctxKey
+)
+
+var (
+	maintenance = NewContextValue[maintenanceCtxKey, bool]()
+	name        = NewContextValue[nameCtxKey, string]()
 )
 
 var (
@@ -147,8 +154,8 @@ func (cm *Manager) Run(ctx context.Context) error {
 			}
 
 			// set context
-			ctx = NewNameContext(ctx, j.name)
-			ctx = NewMaintenanceContext(ctx, j.isMaintenance)
+			ctx = name.WithValue(ctx, j.name)
+			ctx = maintenance.WithValue(ctx, j.isMaintenance)
 
 			// invoke main func with middleware
 			cm.updateState(idx, stateRunning, nil)
@@ -239,28 +246,4 @@ func newJob(name string, schedule Schedule, fn Func, isMaintenance bool) job {
 			state: stateIdle,
 		},
 	}
-}
-
-func NewMaintenanceContext(ctx context.Context, isMaintenance bool) context.Context {
-	return context.WithValue(ctx, maintenanceKey, isMaintenance)
-}
-
-func MaintenanceFromContext(ctx context.Context) bool {
-	if r, ok := ctx.Value(maintenanceKey).(bool); ok {
-		return r
-	}
-
-	return false
-}
-
-func NewNameContext(ctx context.Context, name string) context.Context {
-	return context.WithValue(ctx, nameKey, name)
-}
-
-func NameFromContext(ctx context.Context) string {
-	if v, ok := ctx.Value(nameKey).(string); ok {
-		return v
-	}
-
-	return ""
 }
