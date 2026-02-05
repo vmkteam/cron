@@ -21,6 +21,20 @@ const (
 	stateSkipped  cronState = "skipped"
 )
 
+type ParseOption int
+
+const (
+	Second         ParseOption = 1 << iota // Seconds field, default 0
+	SecondOptional                         // Optional seconds field, default 0
+	Minute                                 // Minutes field, default 0
+	Hour                                   // Hours field, default 0
+	Dom                                    // Day of month field, default *
+	Month                                  // Month field, default *
+	Dow                                    // Day of week field, default *
+	DowOptional                            // Optional day of week field, default *
+	Descriptor                             // Allow descriptors such as @monthly, @weekly, etc.
+)
+
 var (
 	ErrSkipped   = errors.New("skipped")
 	ErrNotFound  = errors.New("job not found")
@@ -75,17 +89,11 @@ type jobState struct {
 
 type Option func(*Manager)
 
-// WithParser defines the custom Schedule parser for the Manager.
-func WithParser(parser cron.Parser) Option {
+// WithParseOptions defines the custom Schedule parser options for the Manager.
+func WithParseOptions(parseOptions ParseOption) Option {
+	parser := cron.NewParser(cron.ParseOption(parseOptions))
 	return func(m *Manager) {
 		m.parser = &parser
-	}
-}
-
-// WithStandardParser makes Manager to use the standard Schedule parser.
-func WithStandardParser() Option {
-	return func(m *Manager) {
-		m.parser = nil
 	}
 }
 

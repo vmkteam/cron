@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/robfig/cron/v3"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -50,8 +49,7 @@ func TestManager_Validate(t *testing.T) {
 
 func TestManager_Options(t *testing.T) {
 	Convey("Test NewManager with custom parser", t, func() {
-		p := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
-		m := NewManager(WithParser(p))
+		m := NewManager(WithParseOptions(Second | Minute | Hour | Dom | Month | Dow | Descriptor))
 
 		Convey("When standard schedule format", func() {
 			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
@@ -70,7 +68,7 @@ func TestManager_Options(t *testing.T) {
 	})
 
 	Convey("Test NewManager with standard parser", t, func() {
-		m := NewManager(WithStandardParser())
+		m := NewManager()
 
 		Convey("When standard schedule format", func() {
 			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
