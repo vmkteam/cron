@@ -48,6 +48,7 @@ func (ss Schedule) IsActive() bool { return ss != Schedule(stateDisabled) && ss 
 // Manager is a Cron manager with context and middleware support.
 type Manager struct {
 	cron       *cron.Cron
+	parser     *cron.Parser
 	middleware []MiddlewareFunc
 	jobs       []job
 	muState    sync.Mutex
@@ -72,10 +73,35 @@ type jobState struct {
 	duration  time.Duration
 }
 
-func NewManager() *Manager {
-	return &Manager{
-		cron: cron.New(),
+type Option func(*Manager)
+
+// WithParser defines the custom Schedule parser for the Manager.
+func WithParser(parser cron.Parser) Option {
+	return func(m *Manager) {
+		m.parser = &parser
 	}
+}
+
+// WithStandardParser makes Manager to use the standard Schedule parser.
+func WithStandardParser() Option {
+	return func(m *Manager) {
+		m.parser = nil
+	}
+}
+
+func NewManager(opts ...Option) *Manager {
+	m := &Manager{}
+	for _, opt := range opts {
+		opt(m)
+	}
+
+	cronOpt := make([]cron.Option, 0, 1)
+	if m.parser != nil {
+		cronOpt = append(cronOpt, cron.WithParser(*m.parser))
+	}
+	m.cron = cron.New(cronOpt...)
+
+	return m
 }
 
 // AddFunc adds func to cron.
@@ -106,7 +132,7 @@ func (cm *Manager) validateJobs() (string, error) {
 
 		// parse schedule
 		if job.schedule.IsActive() {
-			_, err := cron.ParseStandard(job.schedule.String())
+			_, err := cm.parseSchedule(job.schedule)
 			if err != nil {
 				return job.name, err
 			}
@@ -187,6 +213,18 @@ func (cm *Manager) Stop() context.Context {
 	}
 
 	return cm.cron.Stop()
+}
+
+// parseSchedule parses the given schedule using the registered Parser or with Standard Parser if none.
+func (cm *Manager) parseSchedule(s Schedule) (cron.Schedule, error) {
+	var fn func(s string) (cron.Schedule, error)
+	if cm.parser != nil {
+		fn = cm.parser.Parse
+	} else {
+		fn = cron.ParseStandard
+	}
+
+	return fn(s.String())
 }
 
 // updateState set.

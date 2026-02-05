@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -43,6 +44,47 @@ func TestManager_Validate(t *testing.T) {
 
 			So(err, ShouldNotBeNil)
 			So(n2, ShouldEqual, "f3")
+		})
+	})
+}
+
+func TestManager_Options(t *testing.T) {
+	Convey("Test NewManager with custom parser", t, func() {
+		p := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+		m := NewManager(WithParser(p))
+
+		Convey("When standard schedule format", func() {
+			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
+
+			name, err := m.validateJobs()
+			So(err, ShouldNotBeNil)
+			So(name, ShouldEqual, "f1")
+		})
+
+		Convey("When custom schedule format", func() {
+			m.AddFunc("f2", "10 * * * * *", newCronFunc("f1"))
+
+			_, err := m.validateJobs()
+			So(err, ShouldBeNil)
+		})
+	})
+
+	Convey("Test NewManager with standard parser", t, func() {
+		m := NewManager(WithStandardParser())
+
+		Convey("When standard schedule format", func() {
+			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
+
+			_, err := m.validateJobs()
+			So(err, ShouldBeNil)
+		})
+
+		Convey("When custom schedule format", func() {
+			m.AddFunc("f2", "10 * * * * *", newCronFunc("f1"))
+
+			name, err := m.validateJobs()
+			So(err, ShouldNotBeNil)
+			So(name, ShouldEqual, "f2")
 		})
 	})
 }
