@@ -49,7 +49,7 @@ func TestManager_Validate(t *testing.T) {
 
 func TestManager_Options(t *testing.T) {
 	Convey("Test NewManager with custom parser", t, func() {
-		m := NewManager(WithParseOptions(Second | Minute | Hour | Dom | Month | Dow | Descriptor))
+		m := NewManagerWithParser(ParserWithSeconds)
 
 		Convey("When standard schedule format", func() {
 			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))

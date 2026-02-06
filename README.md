@@ -83,12 +83,15 @@ Please see `examples/main.go` for basic usage.
 
 ## Schedule parser customization
 
-To use non-default schedule parser, invoke the `NewManager()` with the `WithParseOptions()` option:
+To use non-default schedule parser, invoke the `NewManagerWithParser()` function:
 
 ```go
 // Init some custom parser, 
 // see https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Alternative_Formats for more info.
-m := cron.NewManager(cron.WithParseOptions(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor))
+m := cron.NewManagerWithParser(cron.WithParseOptions(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor))
+
+// Or use the predefined one:
+m = cron.NewManagerWithParser(cron.ParserWithSeconds)
 
 // Use a schedule format acceptable by the custom parser.
 m.AddFunc("f1", "* * * * * *", func(_ context.Context) error {

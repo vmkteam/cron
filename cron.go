@@ -21,24 +21,15 @@ const (
 	stateSkipped  cronState = "skipped"
 )
 
-type ParseOption int
-
-const (
-	Second         ParseOption = 1 << iota // Seconds field, default 0
-	SecondOptional                         // Optional seconds field, default 0
-	Minute                                 // Minutes field, default 0
-	Hour                                   // Hours field, default 0
-	Dom                                    // Day of month field, default *
-	Month                                  // Month field, default *
-	Dow                                    // Day of week field, default *
-	DowOptional                            // Optional day of week field, default *
-	Descriptor                             // Allow descriptors such as @monthly, @weekly, etc.
-)
-
 var (
 	ErrSkipped   = errors.New("skipped")
 	ErrNotFound  = errors.New("job not found")
 	ErrDuplicate = errors.New("duplicate cron name")
+)
+
+var (
+	// ParserWithSeconds is a schedule parser with the leading seconds support.
+	ParserWithSeconds = cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 )
 
 type (
@@ -87,29 +78,18 @@ type jobState struct {
 	duration  time.Duration
 }
 
-type Option func(*Manager)
-
-// WithParseOptions defines the custom Schedule parser options for the Manager.
-func WithParseOptions(parseOptions ParseOption) Option {
-	parser := cron.NewParser(cron.ParseOption(parseOptions))
-	return func(m *Manager) {
-		m.parser = &parser
+func NewManager() *Manager {
+	return &Manager{
+		cron: cron.New(),
 	}
 }
 
-func NewManager(opts ...Option) *Manager {
-	m := &Manager{}
-	for _, opt := range opts {
-		opt(m)
+// NewManagerWithParser creates new Manager instance with the custom schedule parser.
+func NewManagerWithParser(parser cron.Parser) *Manager {
+	return &Manager{
+		cron:   cron.New(cron.WithParser(parser)),
+		parser: &parser,
 	}
-
-	cronOpt := make([]cron.Option, 0, 1)
-	if m.parser != nil {
-		cronOpt = append(cronOpt, cron.WithParser(*m.parser))
-	}
-	m.cron = cron.New(cronOpt...)
-
-	return m
 }
 
 // AddFunc adds func to cron.
