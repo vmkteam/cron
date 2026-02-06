@@ -47,6 +47,46 @@ func TestManager_Validate(t *testing.T) {
 	})
 }
 
+func TestManager_Options(t *testing.T) {
+	Convey("Test NewManager with custom parser", t, func() {
+		m := NewManagerWithParser(ParserWithSeconds)
+
+		Convey("When standard schedule format", func() {
+			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
+
+			name, err := m.validateJobs()
+			So(err, ShouldNotBeNil)
+			So(name, ShouldEqual, "f1")
+		})
+
+		Convey("When custom schedule format", func() {
+			m.AddFunc("f2", "10 * * * * *", newCronFunc("f1"))
+
+			_, err := m.validateJobs()
+			So(err, ShouldBeNil)
+		})
+	})
+
+	Convey("Test NewManager with standard parser", t, func() {
+		m := NewManager()
+
+		Convey("When standard schedule format", func() {
+			m.AddFunc("f1", "0 0 * * *", newCronFunc("f1"))
+
+			_, err := m.validateJobs()
+			So(err, ShouldBeNil)
+		})
+
+		Convey("When custom schedule format", func() {
+			m.AddFunc("f2", "10 * * * * *", newCronFunc("f1"))
+
+			name, err := m.validateJobs()
+			So(err, ShouldNotBeNil)
+			So(name, ShouldEqual, "f2")
+		})
+	})
+}
+
 func TestManager_Run(t *testing.T) {
 	Convey("Test validate function", t, func() {
 		ctx := t.Context()

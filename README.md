@@ -80,3 +80,26 @@ Please see `examples/main.go` for basic usage.
     
     http.HandleFunc("/debug/cron", m.Handler)
 ```
+
+## Schedule parser customization
+
+To use non-default schedule parser, invoke the `NewManagerWithParser()` function:
+
+```go
+// Init some custom parser, 
+// see https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Alternative_Formats for more info.
+m := cron.NewManagerWithParser(cron.WithParseOptions(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor))
+
+// Or use the predefined one:
+m = cron.NewManagerWithParser(cron.ParserWithSeconds)
+
+// Use a schedule format acceptable by the custom parser.
+m.AddFunc("f1", "* * * * * *", func(_ context.Context) error {
+    // Do some important stuff...
+    return nil
+})
+
+if err := m.Run(context.Background()); err != nil {
+    log.Fatal(err)
+}
+```

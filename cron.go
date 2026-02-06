@@ -27,6 +27,11 @@ var (
 	ErrDuplicate = errors.New("duplicate cron name")
 )
 
+var (
+	// ParserWithSeconds is a schedule parser with the leading seconds support.
+	ParserWithSeconds = cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+)
+
 type (
 	contextKey string
 	cronState  string
@@ -48,6 +53,7 @@ func (ss Schedule) IsActive() bool { return ss != Schedule(stateDisabled) && ss 
 // Manager is a Cron manager with context and middleware support.
 type Manager struct {
 	cron       *cron.Cron
+	parser     *cron.Parser
 	middleware []MiddlewareFunc
 	jobs       []job
 	muState    sync.Mutex
@@ -75,6 +81,14 @@ type jobState struct {
 func NewManager() *Manager {
 	return &Manager{
 		cron: cron.New(),
+	}
+}
+
+// NewManagerWithParser creates new Manager instance with the custom schedule parser.
+func NewManagerWithParser(parser cron.Parser) *Manager {
+	return &Manager{
+		cron:   cron.New(cron.WithParser(parser)),
+		parser: &parser,
 	}
 }
 
@@ -106,7 +120,7 @@ func (cm *Manager) validateJobs() (string, error) {
 
 		// parse schedule
 		if job.schedule.IsActive() {
-			_, err := cron.ParseStandard(job.schedule.String())
+			_, err := cm.parseSchedule(job.schedule)
 			if err != nil {
 				return job.name, err
 			}
@@ -187,6 +201,18 @@ func (cm *Manager) Stop() context.Context {
 	}
 
 	return cm.cron.Stop()
+}
+
+// parseSchedule parses the given schedule using the registered Parser or with Standard Parser if none.
+func (cm *Manager) parseSchedule(s Schedule) (cron.Schedule, error) {
+	var fn func(s string) (cron.Schedule, error)
+	if cm.parser != nil {
+		fn = cm.parser.Parse
+	} else {
+		fn = cron.ParseStandard
+	}
+
+	return fn(s.String())
 }
 
 // updateState set.
