@@ -91,8 +91,8 @@ func WithSentry() MiddlewareFunc {
 					sentryHub := sentry.CurrentHub().Clone()
 					sentryHub.WithScope(func(scope *sentry.Scope) {
 						scope.SetTag("cron", NameFromContext(ctx))
+						sentryHub.CaptureException(err)
 					})
-					sentryHub.CaptureException(err)
 				}
 			}()
 
