@@ -248,3 +248,20 @@ func WithMetrics(app string) MiddlewareFunc {
 		}
 	}
 }
+
+// WithTimeout returns a MiddlewareFunc that wraps a Func with a context timeout.
+func WithTimeout(timeout time.Duration) MiddlewareFunc {
+	return WithDeadlineFunc(func(ctx context.Context) time.Time { return time.Now().Add(timeout) })
+}
+
+// WithDeadlineFunc returns a MiddlewareFunc that wraps a Func with a context deadline.
+// The deadline is determined by calling the provided function df.
+func WithDeadlineFunc(df func(context.Context) time.Time) MiddlewareFunc {
+	return func(next Func) Func {
+		return func(ctx context.Context) error {
+			ctx, cancel := context.WithDeadline(ctx, df(ctx))
+			defer cancel()
+			return next(ctx)
+		}
+	}
+}
